@@ -29,7 +29,7 @@ const emptyDetail = () => ({
 const form = reactive({
     supplier_id: '',
     nomor_faktur: '',
-    tanggal_faktur: new Date().toISOString().slice(0, 10),
+    tanggal_faktur: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
     file_faktur: null,
     catatan: '',
     details: [emptyDetail()],
@@ -133,7 +133,7 @@ function reset() {
     Object.assign(form, {
         supplier_id: '',
         nomor_faktur: '',
-        tanggal_faktur: new Date().toISOString().slice(0, 10),
+        tanggal_faktur: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
         file_faktur: null,
         catatan: '',
         details: [emptyDetail()],
@@ -245,7 +245,7 @@ async function updateReturn(purchase, detail, status) {
         await http.patch(`/purchases/${purchase.id}/details/${detail.id}/return`, {
             status_retur: status,
             qty_retur: Number(detail.retur_qty_input || 0),
-            tanggal_retur: ['diretur', 'ditolak'].includes(status) ? new Date().toISOString().slice(0, 10) : null,
+            tanggal_retur: ['diretur', 'ditolak'].includes(status) ? new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10) : null,
             catatan_retur: status === 'diretur' ? 'Retur ke supplier berdasarkan faktur pembelian.' : null,
         })
 

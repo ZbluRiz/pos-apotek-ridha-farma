@@ -6,7 +6,7 @@ import AppLayout from '../../layouts/AppLayout.vue'
 
 const filter = reactive({
     type: 'daily',
-    date: new Date().toISOString().slice(0, 10),
+    date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
 })

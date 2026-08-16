@@ -5,8 +5,8 @@ import http from '../../api/http'
 import AppLayout from '../../layouts/AppLayout.vue'
 
 const filter = reactive({
-    start_date: new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10),
-    end_date: new Date().toISOString().slice(0, 10),
+    start_date: new Date(Date.now() - 30 * 86400000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
+    end_date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10),
 })
 const ranking = ref([])
 const meta = ref(null)

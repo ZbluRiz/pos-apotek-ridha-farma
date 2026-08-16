@@ -14,7 +14,7 @@ const searchQuery = ref('')
 const selectedReceipt = ref(null)
 const receiptLoading = ref(false)
 const form = reactive({
-    tanggal: new Date().toISOString().slice(0, 16),
+    tanggal: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
     details: [{ medicine_id: '', qty: 1 }],
 })
 
@@ -106,7 +106,7 @@ async function submit() {
         })
 
         actionMessage.value = 'Transaksi berhasil disimpan.'
-        form.tanggal = new Date().toISOString().slice(0, 16)
+        form.tanggal = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)
         form.details = [{ medicine_id: '', qty: 1 }]
         await load()
     } catch (error) {
