@@ -10,19 +10,19 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'superadmin@apotek.test'],
+            ['email' => 'pemilik@ridhafarma.com'],
             [
-                'name' => 'Super Admin',
-                'password' => 'password123',
+                'name' => 'Pemilik Ridha Farma',
+                'password' => 'ridhafarma123',
                 'role' => 'super_admin',
             ]
         );
 
         User::updateOrCreate(
-            ['email' => 'admin@apotek.test'],
+            ['email' => 'kasir@ridhafarma.com'],
             [
-                'name' => 'Admin Apotek',
-                'password' => 'password123',
+                'name' => 'Kasir Ridha Farma',
+                'password' => 'ridhafarma123',
                 'role' => 'admin',
             ]
         );
