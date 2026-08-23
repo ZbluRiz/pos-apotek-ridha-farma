@@ -266,16 +266,20 @@ function invoiceFileName(path) {
 }
 
 function invoiceFileUrl(purchase) {
+    // file_faktur_url dari backend adalah path relatif seperti "/storage/faktur-pembelian/xxx.jpg"
+    // Backend ada di apiOrigin, jadi kita prefix dengan apiOrigin
     const url = purchase?.file_faktur_url
 
     if (!url) {
         return ''
     }
 
+    // Sudah full URL, pakai langsung
     if (/^https?:\/\//i.test(url)) {
         return url
     }
 
+    // Path relatif: gabungkan dengan domain backend (api.apotekridhafarma.biz.id)
     return `${apiOrigin}${url.startsWith('/') ? '' : '/'}${url}`
 }
 
