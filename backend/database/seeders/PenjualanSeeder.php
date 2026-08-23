@@ -13,12 +13,13 @@ class PenjualanSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::where('email', 'superadmin@apotek.test')->first()
-            ?? User::factory()->superAdmin()->create([
-                'name' => 'Super Admin',
-                'email' => 'superadmin@apotek.test',
-                'password' => 'password',
-            ]);
+        // Get an existing user (kasir) to attach the sales to
+        $user = User::where('email', 'kasir@ridhafarma.com')->first();
+        
+        if (!$user) {
+            $this->command->error('User kasir@ridhafarma.com belum ada. Harap jalankan UserSeeder terlebih dahulu.');
+            return;
+        }
 
         DB::transaction(function () use ($user): void {
             $this->restoreStockFromExistingSales();
