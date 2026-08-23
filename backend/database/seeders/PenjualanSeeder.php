@@ -82,64 +82,63 @@ class PenjualanSeeder extends Seeder
 
             $allMedicines = Medicine::all()->keyBy('kode_obat');
 
-            // Generate daily transactions from July 1, 2026 to August 8, 2026
-            $startDate = Carbon::create(2026, 7, 1);
-            $endDate = Carbon::create(2026, 8, 8);
-            $currentDate = $startDate->copy();
+            // Generate exactly 50 transactions for July 2026
+            $trxDates = collect();
+            for ($i = 0; $i < 50; $i++) {
+                $day = rand(1, 31);
+                $hour = rand(8, 20); // between 8 AM and 8 PM
+                $minute = rand(0, 59);
+                $second = rand(0, 59);
+                $trxDates->push(Carbon::create(2026, 7, $day, $hour, $minute, $second));
+            }
+            
+            // Sort by date so transactions are in chronological order
+            $trxDates = $trxDates->sort()->values();
 
             $trxCounter = 1;
 
-            while ($currentDate->lte($endDate)) {
-                // 2 to 4 transactions per day
-                $dailyTxCount = rand(2, 4);
+            foreach ($trxDates as $saleTime) {
+                $sale = Sale::create([
+                    'user_id' => $user->id,
+                    'nomor_transaksi' => 'TRX-' . $saleTime->format('Ymd') . '-' . str_pad((string) $trxCounter++, 4, '0', STR_PAD_LEFT),
+                    'tanggal' => $saleTime,
+                    'total_harga' => 0,
+                ]);
 
-                for ($t = 0; $t < $dailyTxCount; $t++) {
-                    $saleTime = $currentDate->copy()->setTime(8 + rand(0, 11), rand(0, 59));
-                    
-                    $sale = Sale::create([
-                        'user_id' => $user->id,
-                        'nomor_transaksi' => 'TRX-' . $saleTime->format('Ymd') . '-' . str_pad((string) $trxCounter++, 4, '0', STR_PAD_LEFT),
-                        'tanggal' => $saleTime,
-                        'total_harga' => 0,
-                    ]);
+                $total = 0;
 
-                    $total = 0;
+                // Select 1 to 4 random distinct medicines for this transaction
+                $selectedCodes = collect(array_keys($salesWeights))->random(rand(1, 4));
 
-                    // Select 1 to 4 random distinct medicines for this transaction
-                    $selectedCodes = collect(array_keys($salesWeights))->random(rand(1, 4));
-
-                    foreach ($selectedCodes as $kodeObat) {
-                        $medicine = $allMedicines->get($kodeObat);
-                        if (! $medicine || $medicine->stok <= 1) {
-                            continue;
-                        }
-
-                        // Determine sales quantity based on weight
-                        $weight = $salesWeights[$kodeObat] ?? 10;
-                        $baseQty = rand(1, 3);
-                        if ($weight >= 25 && rand(1, 100) <= 60) {
-                            $baseQty += rand(1, 2);
-                        }
-
-                        $qty = min($baseQty, max(1, (int) floor($medicine->stok / 2)));
-
-                        $subtotal = $qty * (float) $medicine->harga_jual;
-
-                        $sale->details()->create([
-                            'medicine_id' => $medicine->id,
-                            'qty' => $qty,
-                            'harga' => $medicine->harga_jual,
-                            'subtotal' => $subtotal,
-                        ]);
-
-                        $medicine->decrement('stok', $qty);
-                        $total += $subtotal;
+                foreach ($selectedCodes as $kodeObat) {
+                    $medicine = $allMedicines->get($kodeObat);
+                    if (! $medicine || $medicine->stok <= 1) {
+                        continue;
                     }
 
-                    $sale->update(['total_harga' => $total]);
+                    // Determine sales quantity based on weight
+                    $weight = $salesWeights[$kodeObat] ?? 10;
+                    $baseQty = rand(1, 3);
+                    if ($weight >= 25 && rand(1, 100) <= 60) {
+                        $baseQty += rand(1, 2);
+                    }
+
+                    $qty = min($baseQty, max(1, (int) floor($medicine->stok / 2)));
+
+                    $subtotal = $qty * (float) $medicine->harga_jual;
+
+                    $sale->details()->create([
+                        'medicine_id' => $medicine->id,
+                        'qty' => $qty,
+                        'harga' => $medicine->harga_jual,
+                        'subtotal' => $subtotal,
+                    ]);
+
+                    $medicine->decrement('stok', $qty);
+                    $total += $subtotal;
                 }
 
-                $currentDate->addDay();
+                $sale->update(['total_harga' => $total]);
             }
         });
     }
