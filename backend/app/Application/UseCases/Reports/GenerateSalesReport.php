@@ -38,7 +38,7 @@ class GenerateSalesReport
 
     private function summary(Builder $query, string $title): array
     {
-        $sales = (clone $query)->with('details')->latest('tanggal')->get();
+        $sales = (clone $query)->with(['details', 'user'])->latest('tanggal')->get();
 
         return [
             'title' => $title,
@@ -59,6 +59,8 @@ class GenerateSalesReport
                 'nomor_transaksi' => $sale->nomor_transaksi,
                 'tanggal' => $sale->tanggal->toISOString(),
                 'total_harga' => (float) $sale->total_harga,
+                'kasir' => $sale->user?->name ?? 'Kasir',
+                'jumlah_item' => (int) $sale->details->sum('qty'),
             ]),
         ];
     }
