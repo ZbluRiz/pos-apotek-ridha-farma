@@ -16,6 +16,10 @@ const actionError = ref('')
 const fileInputKey = ref(0)
 const currentInvoiceFile = ref(null)
 const searchQuery = ref('')
+const filterSupplierId = ref('')
+const filterReturStatus = ref('')
+const filterStartDate = ref('')
+const filterEndDate = ref('')
 const invoicePreview = ref(null)
 
 const emptyDetail = () => ({
@@ -66,6 +70,10 @@ async function loadPurchases() {
             params: {
                 per_page: 50,
                 search: searchQuery.value || undefined,
+                supplier_id: filterSupplierId.value || undefined,
+                retur_status: filterReturStatus.value || undefined,
+                start_date: filterStartDate.value || undefined,
+                end_date: filterEndDate.value || undefined,
             },
         })
         purchases.value = rows(data).map(decoratePurchase)
@@ -109,6 +117,10 @@ async function searchPurchases() {
 
 async function clearSearch() {
     searchQuery.value = ''
+    filterSupplierId.value = ''
+    filterReturStatus.value = ''
+    filterStartDate.value = ''
+    filterEndDate.value = ''
     await loadPurchases()
 }
 
@@ -473,14 +485,41 @@ onMounted(async () => {
                     <h2 class="font-semibold text-slate-900">Riwayat Faktur & Retur</h2>
                     <p class="text-xs text-slate-500">Detail batch expired bisa ditandai untuk retur ke supplier.</p>
                 </div>
-                <form class="flex flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-end" @submit.prevent="searchPurchases">
-                    <div class="flex-1">
-                        <label class="label" for="search_purchases">Cari Faktur</label>
-                        <input id="search_purchases" v-model="searchQuery" class="input" placeholder="Cari obat, kode obat, supplier, atau nomor faktur..." />
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="btn-primary" type="submit">Cari</button>
-                        <button class="btn-muted" type="button" @click="clearSearch">Reset</button>
+                <form class="border-b border-slate-200 p-4" @submit.prevent="searchPurchases">
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 items-end">
+                        <div>
+                            <label class="label" for="search_purchases">Cari Faktur</label>
+                            <input id="search_purchases" v-model="searchQuery" class="input" placeholder="Obat, supplier, atau nomor faktur..." />
+                        </div>
+                        <div>
+                            <label class="label" for="filter_purchase_supplier">Supplier</label>
+                            <select id="filter_purchase_supplier" v-model="filterSupplierId" class="input" @change="searchPurchases">
+                                <option value="">Semua Supplier</option>
+                                <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">{{ supplier.nama_supplier }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="label" for="filter_retur_status">Status Retur</label>
+                            <select id="filter_retur_status" v-model="filterReturStatus" class="input" @change="searchPurchases">
+                                <option value="">Semua Status Retur</option>
+                                <option value="belum_retur">Belum Retur</option>
+                                <option value="diajukan_retur">Diajukan Retur</option>
+                                <option value="diretur">Diretur</option>
+                                <option value="ditolak">Ditolak</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="label" for="filter_purchase_start_date">Tanggal Faktur (Mulai)</label>
+                            <input id="filter_purchase_start_date" v-model="filterStartDate" class="input" type="date" />
+                        </div>
+                        <div>
+                            <label class="label" for="filter_purchase_end_date">Tanggal Faktur (Selesai)</label>
+                            <input id="filter_purchase_end_date" v-model="filterEndDate" class="input" type="date" />
+                        </div>
+                        <div class="flex items-end gap-2 lg:col-span-3 justify-end pt-1">
+                            <button class="btn-primary" type="submit">Cari / Filter</button>
+                            <button class="btn-muted" type="button" @click="clearSearch">Reset</button>
+                        </div>
                     </div>
                 </form>
 

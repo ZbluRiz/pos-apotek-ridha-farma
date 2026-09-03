@@ -12,6 +12,11 @@ const medicinesError = ref('')
 const actionMessage = ref('')
 const actionError = ref('')
 const searchQuery = ref('')
+const filterSupplierId = ref('')
+const filterKategori = ref('')
+const filterStokStatus = ref('')
+const filterExpiredStatus = ref('')
+
 const form = reactive({
     supplier_id: '',
     kode_obat: '',
@@ -47,6 +52,10 @@ async function loadMedicines() {
             params: {
                 per_page: 100,
                 search: searchQuery.value || undefined,
+                supplier_id: filterSupplierId.value || undefined,
+                kategori: filterKategori.value || undefined,
+                stok_status: filterStokStatus.value || undefined,
+                expired_status: filterExpiredStatus.value || undefined,
             },
         })
         medicines.value = rows(data)
@@ -82,6 +91,10 @@ async function searchMedicines() {
 
 async function clearSearch() {
     searchQuery.value = ''
+    filterSupplierId.value = ''
+    filterKategori.value = ''
+    filterStokStatus.value = ''
+    filterExpiredStatus.value = ''
     await loadMedicines()
 }
 
@@ -262,18 +275,42 @@ onMounted(async () => {
             </form>
 
             <section class="overflow-x-auto rounded-md border border-slate-200 bg-white">
-                <div class="flex flex-col gap-3 border-b border-slate-200 p-4 md:flex-row md:items-end md:justify-between">
-                    <div>
+                <div class="border-b border-slate-200 p-4">
+                    <div class="mb-3">
                         <h2 class="font-semibold text-slate-900">Daftar Obat</h2>
-                        <p class="text-xs text-slate-500">Cari berdasarkan kode, nama, atau kategori obat.</p>
+                        <p class="text-xs text-slate-500">Cari dan filter obat berdasarkan kata kunci, supplier, status stok, dan kedaluwarsa.</p>
                     </div>
-                    <form class="flex flex-col gap-2 sm:flex-row md:w-96" @submit.prevent="searchMedicines">
-                        <div class="flex-1">
+                    <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 items-end" @submit.prevent="searchMedicines">
+                        <div>
                             <label class="label" for="search_query">Cari Obat</label>
-                            <input id="search_query" v-model="searchQuery" class="input" placeholder="Cari obat..." />
+                            <input id="search_query" v-model="searchQuery" class="input" placeholder="Kode, nama, atau kategori..." />
                         </div>
-                        <div class="flex items-end gap-2">
-                            <button class="btn-primary" type="submit">Cari</button>
+                        <div>
+                            <label class="label" for="filter_supplier">Supplier</label>
+                            <select id="filter_supplier" v-model="filterSupplierId" class="input" @change="searchMedicines">
+                                <option value="">Semua Supplier</option>
+                                <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">{{ supplier.nama_supplier }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="label" for="filter_stok">Status Stok</label>
+                            <select id="filter_stok" v-model="filterStokStatus" class="input" @change="searchMedicines">
+                                <option value="">Semua Stok</option>
+                                <option value="menipis">Stok Menipis</option>
+                                <option value="habis">Stok Habis</option>
+                                <option value="aman">Stok Aman</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="label" for="filter_expired">Status Expired</label>
+                            <select id="filter_expired" v-model="filterExpiredStatus" class="input" @change="searchMedicines">
+                                <option value="">Semua Expired</option>
+                                <option value="hampir_expired">Hampir Expired (&le; 30 Hari)</option>
+                                <option value="expired">Sudah Expired</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end gap-2 lg:col-span-4 justify-end pt-1">
+                            <button class="btn-primary" type="submit">Cari / Filter</button>
                             <button class="btn-muted" type="button" @click="clearSearch">Reset</button>
                         </div>
                     </form>

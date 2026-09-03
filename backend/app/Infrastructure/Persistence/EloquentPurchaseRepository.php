@@ -27,6 +27,10 @@ class EloquentPurchaseRepository implements PurchaseRepository
             ->when($filters['retur_status'] ?? null, fn ($query, string $status) => $query
                 ->whereHas('details', fn ($detailQuery) => $detailQuery
                     ->where('status_retur', $status)))
+            ->when($filters['start_date'] ?? null, fn ($query, $date) => $query
+                ->whereDate('tanggal_faktur', '>=', $date))
+            ->when($filters['end_date'] ?? null, fn ($query, $date) => $query
+                ->whereDate('tanggal_faktur', '<=', $date))
             ->latest('tanggal_faktur')
             ->paginate($perPage);
     }

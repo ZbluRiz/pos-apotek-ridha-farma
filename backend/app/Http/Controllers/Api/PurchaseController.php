@@ -24,6 +24,8 @@ class PurchaseController extends Controller
             'search' => $request->string('search')->toString(),
             'supplier_id' => $request->integer('supplier_id') ?: null,
             'retur_status' => $request->string('retur_status')->toString() ?: null,
+            'start_date' => $request->date('start_date'),
+            'end_date' => $request->date('end_date'),
         ], $request->integer('per_page', 10));
 
         return response()->json(['data' => PurchaseResource::collection($purchases)]);

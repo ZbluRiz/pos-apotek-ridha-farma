@@ -20,6 +20,25 @@ class EloquentMedicineRepository implements MedicineRepository
                         ->orWhere('nama_obat', 'like', "%{$search}%")
                         ->orWhere('kategori', 'like', "%{$search}%");
                 }))
+            ->when($filters['supplier_id'] ?? null, fn ($query, $supplierId) => $query
+                ->where('supplier_id', $supplierId))
+            ->when($filters['kategori'] ?? null, fn ($query, string $kategori) => $query
+                ->where('kategori', $kategori))
+            ->when($filters['stok_status'] ?? null, function ($query, string $status): void {
+                match ($status) {
+                    'menipis' => $query->lowStock(),
+                    'habis' => $query->where('stok', '<=', 0),
+                    'aman' => $query->whereColumn('stok', '>', 'stok_minimum'),
+                    default => null,
+                };
+            })
+            ->when($filters['expired_status'] ?? null, function ($query, string $status): void {
+                match ($status) {
+                    'hampir_expired' => $query->whereDate('tanggal_expired', '<=', now()->addDays(30))->whereDate('tanggal_expired', '>=', now()),
+                    'expired' => $query->whereDate('tanggal_expired', '<', now()),
+                    default => null,
+                };
+            })
             ->when($filters['low_stock'] ?? false, fn ($query) => $query->lowStock())
             ->when($filters['near_expired'] ?? false, fn ($query) => $query
                 ->whereDate('tanggal_expired', '<=', now()->addDays(30)))

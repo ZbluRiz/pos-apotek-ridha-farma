@@ -10,6 +10,7 @@ const loading = ref(true)
 const error = ref('')
 const actionMessage = ref('')
 const actionError = ref('')
+const searchQuery = ref('')
 const form = reactive({ nama_supplier: '', alamat: '', telepon: '' })
 
 function rows(payload) {
@@ -30,7 +31,10 @@ async function load() {
 
     try {
         const { data } = await http.get('/suppliers', {
-            params: { per_page: 100 },
+            params: {
+                per_page: 100,
+                search: searchQuery.value || undefined,
+            },
         })
         suppliers.value = rows(data)
         await nextTick()
@@ -39,6 +43,15 @@ async function load() {
     } finally {
         loading.value = false
     }
+}
+
+async function searchSuppliers() {
+    await load()
+}
+
+async function clearSearch() {
+    searchQuery.value = ''
+    await load()
 }
 
 function edit(item) {
@@ -124,6 +137,22 @@ onMounted(load)
             </form>
 
             <section class="overflow-x-auto rounded-md border border-slate-200 bg-white">
+                <div class="flex flex-col gap-3 border-b border-slate-200 p-4 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <h2 class="font-semibold text-slate-900">Daftar Supplier</h2>
+                        <p class="text-xs text-slate-500">Cari berdasarkan nama supplier, telepon, atau alamat.</p>
+                    </div>
+                    <form class="flex flex-col gap-2 sm:flex-row md:w-96" @submit.prevent="searchSuppliers">
+                        <div class="flex-1">
+                            <label class="label" for="search_supplier">Cari Supplier</label>
+                            <input id="search_supplier" v-model="searchQuery" class="input" placeholder="Cari nama, telp, atau alamat..." />
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <button class="btn-primary" type="submit">Cari</button>
+                            <button class="btn-muted" type="button" @click="clearSearch">Reset</button>
+                        </div>
+                    </form>
+                </div>
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-100 text-xs uppercase text-slate-500">
                         <tr>

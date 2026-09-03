@@ -1,6 +1,6 @@
 <script setup>
 import { ActivitySquare, RefreshCw } from 'lucide-vue-next'
-import { nextTick, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import http from '../../api/http'
 import AppLayout from '../../layouts/AppLayout.vue'
 
@@ -12,6 +12,18 @@ const ranking = ref([])
 const meta = ref(null)
 const loading = ref(true)
 const error = ref('')
+const searchQuery = ref('')
+
+const filteredRanking = computed(() => {
+    if (!searchQuery.value.trim()) {
+        return ranking.value
+    }
+    const query = searchQuery.value.toLowerCase().trim()
+    return ranking.value.filter((item) => (
+        (item.nama_obat || '').toLowerCase().includes(query) ||
+        (item.kode_obat || '').toLowerCase().includes(query)
+    ))
+})
 
 async function load() {
     loading.value = true
@@ -63,9 +75,15 @@ onMounted(load)
         </section>
 
         <section class="overflow-x-auto rounded-md border border-slate-200 bg-white">
-            <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3 font-semibold">
-                <ActivitySquare class="h-4 w-4 text-leaf" />
-                Rekomendasi Restock
+            <div class="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-2 font-semibold text-slate-900">
+                    <ActivitySquare class="h-4 w-4 text-leaf" />
+                    Rekomendasi Restock
+                </div>
+                <div class="w-full sm:w-72">
+                    <label class="sr-only" for="search_saw">Cari Obat</label>
+                    <input id="search_saw" v-model="searchQuery" class="input" placeholder="Cari obat di hasil SAW..." />
+                </div>
             </div>
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-100 text-xs uppercase text-slate-500">
@@ -85,11 +103,13 @@ onMounted(load)
                     <tr v-else-if="error">
                         <td class="px-3 py-8 text-center text-rosewood" colspan="6">{{ error }}</td>
                     </tr>
-                    <tr v-else-if="ranking.length === 0">
-                        <td class="px-3 py-8 text-center text-slate-500" colspan="6">Belum ada data untuk dihitung.</td>
+                    <tr v-else-if="filteredRanking.length === 0">
+                        <td class="px-3 py-8 text-center text-slate-500" colspan="6">
+                            {{ ranking.length === 0 ? 'Belum ada data untuk dihitung.' : 'Tidak ada obat yang cocok dengan pencarian.' }}
+                        </td>
                     </tr>
                     <template v-else>
-                        <tr v-for="item in ranking" :key="item.medicine_id">
+                        <tr v-for="item in filteredRanking" :key="item.medicine_id">
                             <td class="px-3 py-3 font-semibold text-leaf">#{{ item.ranking }}</td>
                             <td class="px-3 py-3">
                                 <p class="font-medium">{{ item.nama_obat }}</p>

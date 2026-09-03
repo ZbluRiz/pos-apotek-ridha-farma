@@ -13,7 +13,11 @@ class EloquentSupplierRepository implements SupplierRepository
         return Supplier::query()
             ->withCount('medicines')
             ->when($filters['search'] ?? null, fn ($query, string $search) => $query
-                ->where('nama_supplier', 'like', "%{$search}%"))
+                ->where(function ($nested) use ($search): void {
+                    $nested->where('nama_supplier', 'like', "%{$search}%")
+                        ->orWhere('telepon', 'like', "%{$search}%")
+                        ->orWhere('alamat', 'like', "%{$search}%");
+                }))
             ->latest()
             ->paginate($perPage);
     }

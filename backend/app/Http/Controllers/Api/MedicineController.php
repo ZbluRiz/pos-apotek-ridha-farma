@@ -19,6 +19,10 @@ class MedicineController extends Controller
         $this->authorize('viewAny', Medicine::class);
         $medicines = $this->useCase->list([
             'search' => $request->string('search')->toString(),
+            'supplier_id' => $request->integer('supplier_id') ?: null,
+            'kategori' => $request->string('kategori')->toString() ?: null,
+            'stok_status' => $request->string('stok_status')->toString() ?: null,
+            'expired_status' => $request->string('expired_status')->toString() ?: null,
             'low_stock' => $request->boolean('low_stock'),
             'near_expired' => $request->boolean('near_expired'),
         ], $request->integer('per_page', 10));

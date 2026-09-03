@@ -11,6 +11,8 @@ const salesError = ref('')
 const actionMessage = ref('')
 const actionError = ref('')
 const searchQuery = ref('')
+const filterStartDate = ref('')
+const filterEndDate = ref('')
 const selectedReceipt = ref(null)
 const receiptLoading = ref(false)
 const form = reactive({
@@ -39,6 +41,8 @@ async function loadSales() {
             params: {
                 per_page: 50,
                 search: searchQuery.value || undefined,
+                start_date: filterStartDate.value || undefined,
+                end_date: filterEndDate.value || undefined,
             },
         })
         sales.value = rows(data)
@@ -72,6 +76,8 @@ async function searchSales() {
 
 async function clearSearch() {
     searchQuery.value = ''
+    filterStartDate.value = ''
+    filterEndDate.value = ''
     await loadSales()
 }
 
@@ -240,18 +246,26 @@ onMounted(async () => {
             </form>
 
             <section class="overflow-x-auto rounded-md border border-slate-200 bg-white">
-                <div class="flex flex-col gap-3 border-b border-slate-200 p-4 md:flex-row md:items-end md:justify-between">
-                    <div>
+                <div class="border-b border-slate-200 p-4">
+                    <div class="mb-3">
                         <h2 class="font-semibold text-slate-900">Riwayat Penjualan</h2>
-                        <p class="text-xs text-slate-500">Cari transaksi berdasarkan nama/kode obat atau nomor transaksi.</p>
+                        <p class="text-xs text-slate-500">Cari transaksi berdasarkan nomor transaksi, obat, atau rentang tanggal.</p>
                     </div>
-                    <form class="flex flex-col gap-2 sm:flex-row md:w-[430px]" @submit.prevent="searchSales">
-                        <div class="flex-1">
+                    <form class="grid gap-3 sm:grid-cols-3 items-end" @submit.prevent="searchSales">
+                        <div>
                             <label class="label" for="search_sales">Cari Penjualan</label>
-                            <input id="search_sales" v-model="searchQuery" class="input" placeholder="Cari obat di transaksi..." />
+                            <input id="search_sales" v-model="searchQuery" class="input" placeholder="Obat / nomor transaksi..." />
                         </div>
-                        <div class="flex items-end gap-2">
-                            <button class="btn-primary" type="submit">Cari</button>
+                        <div>
+                            <label class="label" for="filter_sale_start_date">Tanggal Transaksi (Mulai)</label>
+                            <input id="filter_sale_start_date" v-model="filterStartDate" class="input" type="date" />
+                        </div>
+                        <div>
+                            <label class="label" for="filter_sale_end_date">Tanggal Transaksi (Selesai)</label>
+                            <input id="filter_sale_end_date" v-model="filterEndDate" class="input" type="date" />
+                        </div>
+                        <div class="flex items-end gap-2 sm:col-span-3 justify-end pt-1">
+                            <button class="btn-primary" type="submit">Cari / Filter</button>
                             <button class="btn-muted" type="button" @click="clearSearch">Reset</button>
                         </div>
                     </form>
