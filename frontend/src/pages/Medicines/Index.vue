@@ -1,5 +1,5 @@
 <script setup>
-import { AlertCircle, CheckCircle2, Edit, Plus, Save, Trash2, X } from 'lucide-vue-next'
+import { AlertCircle, ArrowDown, ArrowUp, ArrowUpDown, CheckCircle2, Edit, Plus, Save, Trash2, X } from 'lucide-vue-next'
 import { nextTick, onMounted, reactive, ref } from 'vue'
 import http from '../../api/http'
 import AppLayout from '../../layouts/AppLayout.vue'
@@ -16,6 +16,8 @@ const filterSupplierId = ref('')
 const filterKategori = ref('')
 const filterStokStatus = ref('')
 const filterExpiredStatus = ref('')
+const sortBy = ref('kode_obat')
+const sortDir = ref('asc')
 
 const form = reactive({
     supplier_id: '',
@@ -56,6 +58,8 @@ async function loadMedicines() {
                 kategori: filterKategori.value || undefined,
                 stok_status: filterStokStatus.value || undefined,
                 expired_status: filterExpiredStatus.value || undefined,
+                sort_by: sortBy.value || undefined,
+                sort_dir: sortDir.value || undefined,
             },
         })
         medicines.value = rows(data)
@@ -95,7 +99,19 @@ async function clearSearch() {
     filterKategori.value = ''
     filterStokStatus.value = ''
     filterExpiredStatus.value = ''
+    sortBy.value = 'kode_obat'
+    sortDir.value = 'asc'
     await loadMedicines()
+}
+
+function toggleSort(column) {
+    if (sortBy.value === column) {
+        sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+    } else {
+        sortBy.value = column
+        sortDir.value = 'asc'
+    }
+    void loadMedicines()
 }
 
 function reset() {
@@ -316,13 +332,48 @@ onMounted(async () => {
                     </form>
                 </div>
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-100 text-xs uppercase text-slate-500">
+                    <thead class="bg-slate-100 text-xs uppercase text-slate-500 select-none">
                         <tr>
-                            <th class="px-3 py-3">Kode</th>
-                            <th class="px-3 py-3">Obat</th>
-                            <th class="px-3 py-3">Stok</th>
-                            <th class="px-3 py-3">Harga</th>
-                            <th class="px-3 py-3">Expired</th>
+                            <th class="px-3 py-3 cursor-pointer hover:bg-slate-200 transition-colors" title="Klik untuk mengurutkan berdasarkan Kode Obat" @click="toggleSort('kode_obat')">
+                                <div class="flex items-center gap-1.5">
+                                    <span>Kode</span>
+                                    <ArrowUp v-if="sortBy === 'kode_obat' && sortDir === 'asc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowDown v-else-if="sortBy === 'kode_obat' && sortDir === 'desc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-400" />
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 cursor-pointer hover:bg-slate-200 transition-colors" title="Klik untuk mengurutkan berdasarkan Nama Obat (Abjad)" @click="toggleSort('nama_obat')">
+                                <div class="flex items-center gap-1.5">
+                                    <span>Obat</span>
+                                    <ArrowUp v-if="sortBy === 'nama_obat' && sortDir === 'asc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowDown v-else-if="sortBy === 'nama_obat' && sortDir === 'desc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-400" />
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 cursor-pointer hover:bg-slate-200 transition-colors" title="Klik untuk mengurutkan berdasarkan Stok" @click="toggleSort('stok')">
+                                <div class="flex items-center gap-1.5">
+                                    <span>Stok</span>
+                                    <ArrowUp v-if="sortBy === 'stok' && sortDir === 'asc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowDown v-else-if="sortBy === 'stok' && sortDir === 'desc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-400" />
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 cursor-pointer hover:bg-slate-200 transition-colors" title="Klik untuk mengurutkan berdasarkan Harga Jual" @click="toggleSort('harga_jual')">
+                                <div class="flex items-center gap-1.5">
+                                    <span>Harga</span>
+                                    <ArrowUp v-if="sortBy === 'harga_jual' && sortDir === 'asc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowDown v-else-if="sortBy === 'harga_jual' && sortDir === 'desc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-400" />
+                                </div>
+                            </th>
+                            <th class="px-3 py-3 cursor-pointer hover:bg-slate-200 transition-colors" title="Klik untuk mengurutkan berdasarkan Tanggal Expired" @click="toggleSort('tanggal_expired')">
+                                <div class="flex items-center gap-1.5">
+                                    <span>Expired</span>
+                                    <ArrowUp v-if="sortBy === 'tanggal_expired' && sortDir === 'asc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowDown v-else-if="sortBy === 'tanggal_expired' && sortDir === 'desc'" class="h-3.5 w-3.5 text-leaf font-bold" />
+                                    <ArrowUpDown v-else class="h-3.5 w-3.5 text-slate-400" />
+                                </div>
+                            </th>
                             <th class="px-3 py-3"></th>
                         </tr>
                     </thead>

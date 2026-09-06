@@ -42,7 +42,16 @@ class EloquentMedicineRepository implements MedicineRepository
             ->when($filters['low_stock'] ?? false, fn ($query) => $query->lowStock())
             ->when($filters['near_expired'] ?? false, fn ($query) => $query
                 ->whereDate('tanggal_expired', '<=', now()->addDays(30)))
-            ->latest()
+            ->when($filters['sort_by'] ?? 'kode_obat', function ($query, string $sortBy) use ($filters): void {
+                $direction = strtolower($filters['sort_dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+                match ($sortBy) {
+                    'nama_obat' => $query->orderBy('nama_obat', $direction),
+                    'stok' => $query->orderBy('stok', $direction),
+                    'harga_jual' => $query->orderBy('harga_jual', $direction),
+                    'tanggal_expired' => $query->orderBy('tanggal_expired', $direction),
+                    default => $query->orderBy('kode_obat', $direction),
+                };
+            })
             ->paginate($perPage);
     }
 

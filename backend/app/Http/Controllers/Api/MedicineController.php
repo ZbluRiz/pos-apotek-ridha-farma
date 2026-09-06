@@ -25,6 +25,8 @@ class MedicineController extends Controller
             'expired_status' => $request->string('expired_status')->toString() ?: null,
             'low_stock' => $request->boolean('low_stock'),
             'near_expired' => $request->boolean('near_expired'),
+            'sort_by' => $request->string('sort_by')->toString() ?: null,
+            'sort_dir' => $request->string('sort_dir')->toString() ?: null,
         ], $request->integer('per_page', 10));
 
         return response()->json(['data' => MedicineResource::collection($medicines)]);
